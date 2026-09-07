@@ -1,4 +1,4 @@
-# 🚀 DATATHON – AutoInsight AI
+# 🚀 DATATHON – AutoInsight
 
 ## 📌 About the Project
 
