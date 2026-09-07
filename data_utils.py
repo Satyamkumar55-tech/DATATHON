@@ -109,9 +109,57 @@ def detect_column_types(df):
     return col_types
 
 
+def get_dataset_overview(df, column_types):
+    """Return a summary dict of the dataset before cleaning."""
+    if df is None:
+        df = pd.DataFrame()
+
+    num_rows = int(df.shape[0])
+    num_cols = int(df.shape[1])
+    column_names = [str(c) for c in df.columns]
+
+    numeric_columns = [col for col, t in column_types.items() if t == "numeric"]
+    categorical_columns = [col for col, t in column_types.items() if t == "categorical"]
+    date_columns = [col for col, t in column_types.items() if t == "date"]
+    text_columns = [col for col, t in column_types.items() if t == "text"]
+
+    if num_rows == 0 or num_cols == 0:
+        missing_values_per_column = {str(c): 0 for c in column_names}
+        total_missing_values = 0
+        duplicate_row_count = 0
+    else:
+        missing_series = df.isnull().sum()
+        missing_values_per_column = {str(col): int(val) for col, val in missing_series.items()}
+        total_missing_values = int(missing_series.sum())
+        duplicate_row_count = int(df.duplicated().sum())
+
+    return {
+        "num_rows": num_rows,
+        "num_cols": num_cols,
+        "column_names": column_names,
+        "numeric_columns": numeric_columns,
+        "categorical_columns": categorical_columns,
+        "date_columns": date_columns,
+        "text_columns": text_columns,
+        "missing_values_per_column": missing_values_per_column,
+        "total_missing_values": total_missing_values,
+        "duplicate_row_count": duplicate_row_count,
+    }
+
+
 if __name__ == "__main__":
-    df = load_data("sample_data/sales_sample.csv")
-    print(df.shape)
-    print(df.head(3))
-    types = detect_column_types(df)
-    print(types)
+    sample_files = [
+        "sample_data/sales_sample.csv",
+        "sample_data/health_sample.csv",
+        "sample_data/marketing_sample.csv",
+    ]
+
+    for file_path in sample_files:
+        print(f"\n{'='*20} {file_path} {'='*20}")
+        df = load_data(file_path)
+        print("Data shape:", df.shape)
+        print("First 3 rows:\n", df.head(3))
+        types = detect_column_types(df)
+        print("Detected types:\n", types)
+        overview = get_dataset_overview(df, types)
+        print("Overview:\n", overview)
