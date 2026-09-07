@@ -115,6 +115,32 @@ def analyze_dataset(df: pd.DataFrame) -> dict:
     return output
 
 
+def perform_clustering(df, types):
+    """Run K-Means clustering on numeric columns if enough data exists."""
+    import numpy as np
+    from sklearn.cluster import KMeans
+    from sklearn.preprocessing import StandardScaler
+
+    numeric = [c for c, t in types.items() if t == "numeric"]
+    if len(numeric) < 2 or len(df) < 10:
+        return {"available": False, "reason": "Need at least 2 numeric columns and 10 rows."}
+    
+    data = df[numeric].replace([np.inf, -np.inf], np.nan).dropna()
+    if len(data) < 10:
+        return {"available": False, "reason": "Not enough complete numeric rows for clustering."}
+
+    cols = numeric[:8]
+    X = StandardScaler().fit_transform(data[cols])
+    k = min(4, max(2, int(np.sqrt(len(data) / 2))))
+    k = min(k, 8)
+    model = KMeans(n_clusters=k, random_state=42, n_init=10)
+    labels = model.fit_predict(X)
+    summary = data.copy()
+    summary["Cluster"] = labels
+    cluster_summary = summary.groupby("Cluster")[cols].mean().round(2).reset_index()
+    return {"available": True, "n_clusters": k, "summary": cluster_summary}
+
+
 if __name__ == "__main__":
     df = pd.read_csv("sample.csv")
     output = analyze_dataset(df)

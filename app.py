@@ -10,7 +10,7 @@ Hackathon Team:
 - app.py              → Member 4 (You): Dashboard UI & Integration Structure
 """
 
-import inspect
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
@@ -35,166 +35,14 @@ def _width_kwarg() -> Dict[str, str]:
     return {"width": "stretch"}
 
 
-# Custom CSS for modern, clean, hackathon-ready UI styling
-st.markdown(
-    """
-    <style>
-    /* Global layout enhancements */
-    .block-container {
-        padding-top: 1.8rem;
-        padding-bottom: 2.5rem;
-    }
+def load_styles():
+    """Load external styles.css design system."""
+    styles_path = Path(__file__).parent / "styles.css"
+    if styles_path.exists():
+        st.markdown(f"<style>{styles_path.read_text()}</style>", unsafe_allow_html=True)
 
-    /* 1️⃣ Header Hero styling */
-    .hero-container {
-        background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
-        border-radius: 12px;
-        padding: 2rem 2.2rem;
-        margin-bottom: 1.8rem;
-        color: #F8FAFC;
-        border: 1px solid #334155;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-    }
-    .hero-title {
-        font-size: 2.2rem;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        margin: 0 0 0.4rem 0;
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-    }
-    .hero-tagline {
-        font-size: 1.15rem;
-        font-weight: 500;
-        color: #38BDF8;
-        margin-bottom: 0.4rem;
-    }
-    .hero-subtitle {
-        font-size: 0.95rem;
-        color: #94A3B8;
-        margin: 0;
-    }
 
-    /* 3️⃣ Welcome / Empty State Card */
-    .welcome-card {
-        background-color: #FFFFFF;
-        border: 1px solid #E2E8F0;
-        border-radius: 14px;
-        padding: 2.5rem;
-        text-align: center;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-        margin: 1.5rem auto;
-        max-width: 760px;
-    }
-    .welcome-icon {
-        font-size: 3.2rem;
-        margin-bottom: 1rem;
-    }
-    .welcome-title {
-        font-size: 1.6rem;
-        font-weight: 700;
-        color: #0F172A;
-        margin-bottom: 0.5rem;
-    }
-    .welcome-desc {
-        font-size: 1rem;
-        color: #64748B;
-        margin-bottom: 1.6rem;
-    }
-    .feature-pill-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 0.8rem;
-        margin: 1.5rem 0;
-        text-align: left;
-    }
-    .feature-pill {
-        background-color: #F8FAFC;
-        border: 1px solid #E2E8F0;
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
-        font-size: 0.92rem;
-        color: #334155;
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-    }
-    .feature-pill span.check {
-        color: #10B981;
-        font-weight: bold;
-    }
-
-    /* 6️⃣ Cleaning Report Actions */
-    .action-badge {
-        background: #F0FDF4;
-        border-left: 4px solid #10B981;
-        border-radius: 6px;
-        padding: 0.75rem 1rem;
-        margin-bottom: 0.6rem;
-        font-size: 0.95rem;
-        color: #14532D;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    /* 7️⃣ Key Insight Cards */
-    .insight-card {
-        border-radius: 10px;
-        padding: 1.1rem 1.3rem;
-        margin-bottom: 0.9rem;
-        border: 1px solid #E2E8F0;
-        background-color: #FFFFFF;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    }
-    .insight-card.correlation {
-        border-left: 4px solid #F97316;
-        background: #FFFBF7;
-    }
-    .insight-card.category {
-        border-left: 4px solid #8B5CF6;
-        background: #FAF8FF;
-    }
-    .insight-card.anomaly {
-        border-left: 4px solid #EF4444;
-        background: #FEF2F2;
-    }
-    .insight-card.general {
-        border-left: 4px solid #3B82F6;
-        background: #F8FAFC;
-    }
-    .insight-header {
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        font-weight: 700;
-        letter-spacing: 0.04em;
-        margin-bottom: 0.35rem;
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-    }
-    .insight-text {
-        font-size: 1rem;
-        font-weight: 500;
-        color: #1E293B;
-        margin: 0;
-    }
-
-    /* Section Headings */
-    .section-header {
-        font-size: 1.35rem;
-        font-weight: 700;
-        color: #0F172A;
-        margin: 1.6rem 0 0.8rem 0;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+load_styles()
 
 
 # ==============================================================================
@@ -204,9 +52,10 @@ st.markdown(
 # As per project guidelines, we DO NOT implement their logic.
 # These conditional imports gracefully detect when the team's modules exist.
 try:
-    from modules.loader import load_data  # type: ignore
+    from data_utils import load_data, detect_column_types
 except ImportError:
     load_data = None
+    detect_column_types = None
 
 try:
     from modules.cleaner import clean_data  # type: ignore
@@ -214,9 +63,10 @@ except ImportError:
     clean_data = None
 
 try:
-    from modules.analyzer import analyze_data  # type: ignore
+    from analyzer import analyze_dataset as analyze_data, perform_clustering
 except ImportError:
     analyze_data = None
+    perform_clustering = None
 
 
 # ==============================================================================
@@ -327,13 +177,36 @@ def _get_demo_insights(df: pd.DataFrame) -> List[str]:
 # 3. MODULAR REUSABLE UI FUNCTIONS
 # ==============================================================================
 def show_header() -> None:
-    """1️⃣ HEADER: Clean, attractive, professional top branding section."""
+    """1️⃣ HEADER: Modern Hero Band section with pill badges."""
     st.markdown(
         """
-        <div class="hero-container">
-            <div class="hero-title">🔍 AutoInsight</div>
-            <div class="hero-tagline">Upload. Analyze. Understand.</div>
-            <div class="hero-subtitle">Turn raw datasets into meaningful insights automatically.</div>
+        <div class="hero-band">
+            <div class="hero-band-title">🔍 AutoInsight</div>
+            <div class="hero-band-subtitle">Upload. Analyze. Understand.</div>
+            <div class="hero-pills">
+                <div class="hero-pill">◉ Auto-detect</div>
+                <div class="hero-pill">◉ Clean + profile</div>
+                <div class="hero-pill">◉ Explore patterns</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def show_dataset_strip(filename: str, rows: int, cols: int) -> None:
+    """Connected dataset strip badge with glowing status dot."""
+    st.markdown(
+        f"""
+        <div class="dataset-strip">
+            <div class="dataset-strip-left">
+                <span class="status-dot"></span>
+                <span class="dataset-filename">{filename}</span>
+                <span class="dataset-badge">Connected</span>
+            </div>
+            <div class="dataset-meta">
+                📊 <strong>{rows:,}</strong> rows × <strong>{cols}</strong> columns
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -534,8 +407,25 @@ def display_charts(charts: Optional[List[go.Figure]] = None) -> None:
                 st.plotly_chart(fig, **_width_kwarg())
 
 
-def show_visualizations(df: pd.DataFrame, charts: Optional[List[go.Figure]] = None) -> None:
-    """8️⃣ AUTOMATIC VISUALIZATIONS: Responsive chart layout using columns."""
+def _compute_iqr_outlier_mask(series: pd.Series) -> pd.Series:
+    """Compute boolean mask for outliers using IQR method matching analyzer.py."""
+    s = series.dropna()
+    if len(s) < 4:
+        return pd.Series(False, index=series.index)
+    q1 = s.quantile(0.25)
+    q3 = s.quantile(0.75)
+    iqr = q3 - q1
+    lower = q1 - 1.5 * iqr
+    upper = q3 + 1.5 * iqr
+    return (series < lower) | (series > upper)
+
+
+def show_visualizations(
+    df: pd.DataFrame,
+    charts: Optional[List[go.Figure]] = None,
+    analysis_results: Optional[Dict[str, Any]] = None,
+) -> None:
+    """8️⃣ AUTOMATIC VISUALIZATIONS: Responsive chart layout with outlier highlighting."""
     st.markdown('<div class="section-header">📈 Data Visualizations</div>', unsafe_allow_html=True)
 
     # If analyzer module already produced pre-computed Plotly figures, render them
@@ -557,15 +447,33 @@ def show_visualizations(df: pd.DataFrame, charts: Optional[List[go.Figure]] = No
         st.markdown("##### 📊 Distribution")
         if numeric_cols:
             num_col = numeric_cols[0]
-            fig_dist = px.histogram(
-                df,
-                x=num_col,
-                nbins=25,
-                marginal="box",
-                title=f"Distribution of {num_col}",
-                template="plotly_white",
-                color_discrete_sequence=["#2563EB"],
-            )
+            plot_df = df.copy()
+            outlier_mask = _compute_iqr_outlier_mask(plot_df[num_col])
+            has_outliers = bool(outlier_mask.any())
+
+            if has_outliers:
+                plot_df["Data Point"] = np.where(outlier_mask, "⚠️ Outlier", "Normal")
+                color_map = {"Normal": "#2563EB", "⚠️ Outlier": "#EF4444"}
+                fig_dist = px.histogram(
+                    plot_df,
+                    x=num_col,
+                    color="Data Point",
+                    color_discrete_map=color_map,
+                    nbins=25,
+                    marginal="box",
+                    title=f"Distribution of {num_col} (Outliers in Red)",
+                    template="plotly_white",
+                )
+            else:
+                fig_dist = px.histogram(
+                    plot_df,
+                    x=num_col,
+                    nbins=25,
+                    marginal="box",
+                    title=f"Distribution of {num_col}",
+                    template="plotly_white",
+                    color_discrete_sequence=["#2563EB"],
+                )
             fig_dist.update_layout(
                 margin=dict(l=20, r=20, t=40, b=20),
                 height=340,
@@ -577,7 +485,7 @@ def show_visualizations(df: pd.DataFrame, charts: Optional[List[go.Figure]] = No
             st.info("No numeric columns available for distribution plot.")
 
     with col2:
-        st.markdown("##### 📊 Category Analysis")
+        st.markdown("##### 📊 Category / Correlation Analysis")
         if cat_cols:
             cat_col = cat_cols[0]
             top_cats = df[cat_col].value_counts().head(8).reset_index()
@@ -600,14 +508,32 @@ def show_visualizations(df: pd.DataFrame, charts: Optional[List[go.Figure]] = No
             )
             st.plotly_chart(fig_cat, **_width_kwarg())
         elif len(numeric_cols) >= 2:
-            fig_scatter = px.scatter(
-                df,
-                x=numeric_cols[0],
-                y=numeric_cols[1],
-                title=f"{numeric_cols[0]} vs {numeric_cols[1]}",
-                template="plotly_white",
-                color_discrete_sequence=["#8B5CF6"],
-            )
+            plot_df = df.copy()
+            col_x, col_y = numeric_cols[0], numeric_cols[1]
+            scatter_outlier_mask = _compute_iqr_outlier_mask(plot_df[col_x]) | _compute_iqr_outlier_mask(plot_df[col_y])
+            has_scatter_outliers = bool(scatter_outlier_mask.any())
+
+            if has_scatter_outliers:
+                plot_df["Data Point"] = np.where(scatter_outlier_mask, "⚠️ Outlier", "Normal")
+                scatter_color_map = {"Normal": "#8B5CF6", "⚠️ Outlier": "#EF4444"}
+                fig_scatter = px.scatter(
+                    plot_df,
+                    x=col_x,
+                    y=col_y,
+                    color="Data Point",
+                    color_discrete_map=scatter_color_map,
+                    title=f"{col_x} vs {col_y} (Outliers in Red)",
+                    template="plotly_white",
+                )
+            else:
+                fig_scatter = px.scatter(
+                    plot_df,
+                    x=col_x,
+                    y=col_y,
+                    title=f"{col_x} vs {col_y}",
+                    template="plotly_white",
+                    color_discrete_sequence=["#8B5CF6"],
+                )
             fig_scatter.update_layout(
                 margin=dict(l=20, r=20, t=40, b=20),
                 height=340,
@@ -672,6 +598,87 @@ def show_correlation(df: pd.DataFrame, correlation_matrix: Optional[pd.DataFrame
     st.plotly_chart(fig_corr, **_width_kwarg())
 
 
+def generate_executive_summary(
+    df: pd.DataFrame,
+    analysis_results: Optional[Dict[str, Any]] = None,
+    clustering_result: Optional[Dict[str, Any]] = None,
+) -> str:
+    """Generate a 4-6 sentence plain-language summary paragraph from precomputed analysis results."""
+    sentences: List[str] = []
+
+    # 1. Dataset dimensions
+    num_rows = len(df)
+    num_cols = len(df.columns)
+    sentences.append(f"This dataset contains {num_rows:,} records across {num_cols} columns.")
+
+    if analysis_results and isinstance(analysis_results, dict):
+        # 2. Strongest correlation
+        corrs = analysis_results.get("correlations", [])
+        if corrs:
+            sorted_corrs = sorted(
+                corrs,
+                key=lambda x: abs(x.get("value", 0)) if isinstance(x, dict) else 0,
+                reverse=True,
+            )
+            top_corr = sorted_corrs[0]
+            col1 = top_corr.get("col_a")
+            col2 = top_corr.get("col_b")
+            val = top_corr.get("value")
+            if col1 and col2 and val is not None:
+                sentences.append(
+                    f"The strongest relationship found is between '{col1}' and '{col2}' (correlation: {val})."
+                )
+
+        # 3. Categorical distribution
+        cat_summary = analysis_results.get("categorical_summary", {})
+        if cat_summary and isinstance(cat_summary, dict):
+            for cat_col, stats in cat_summary.items():
+                if isinstance(stats, dict):
+                    top_val = stats.get("most_common")
+                    unique_cnt = stats.get("unique_count", 0)
+                    if top_val is not None:
+                        sentences.append(
+                            f"'{cat_col}' shows '{top_val}' as the most common value across {unique_cnt} distinct categories."
+                        )
+                        break
+
+        # 4. Outliers
+        outliers = analysis_results.get("outliers", {})
+        if outliers and isinstance(outliers, dict):
+            valid_outliers = {k: v for k, v in outliers.items() if isinstance(v, (int, float)) and v > 0}
+            if valid_outliers:
+                top_outlier_col, outlier_count = max(valid_outliers.items(), key=lambda x: x[1])
+                if outlier_count == 1:
+                    sentences.append(
+                        f"1 unusual value was detected in '{top_outlier_col}', which may need review."
+                    )
+                else:
+                    sentences.append(
+                        f"{outlier_count} unusual values were detected in '{top_outlier_col}', which may need review."
+                    )
+
+        # 5. Numeric range / summary
+        num_summary = analysis_results.get("numeric_summary", {})
+        if num_summary and isinstance(num_summary, dict):
+            for num_col, stats in num_summary.items():
+                if isinstance(stats, dict):
+                    mean_val = stats.get("mean")
+                    min_val = stats.get("min")
+                    max_val = stats.get("max")
+                    if mean_val is not None and min_val is not None and max_val is not None:
+                        sentences.append(
+                            f"Numeric values in '{num_col}' range from {min_val} to {max_val} with an average of {mean_val}."
+                        )
+                        break
+
+    # 6. Clustering summary
+    if clustering_result and clustering_result.get("available"):
+        n = clustering_result.get("n_clusters")
+        sentences.append(f"K-Means found {n} groups from the numeric features, useful for segmenting similar records.")
+
+    return " ".join(sentences)
+
+
 # ==============================================================================
 # 4. MASTER DASHBOARD ORCHESTRATOR
 # ==============================================================================
@@ -682,7 +689,7 @@ def display_dashboard(
     analysis_results: Optional[Dict[str, Any]] = None,
     active_section: str = "Dashboard",
 ) -> None:
-    """Master orchestrator rendering dashboard components based on sidebar selection."""
+    """Master orchestrator rendering dashboard components via tabs."""
     if cleaned_df.empty:
         st.warning("⚠️ The loaded dataset is empty. Please upload a dataset containing records.")
         return
@@ -701,59 +708,188 @@ def display_dashboard(
     if cleaning_report is None:
         cleaning_report = _get_demo_cleaning_report(cleaned_df)
 
-    # Route based on clean sidebar radio
-    if active_section in ("Dashboard", "All"):
-        show_dataset_overview(cleaned_df, metadata)
-        st.divider()
-        show_data_preview(cleaned_df)
-        st.divider()
-        show_cleaning_report(cleaning_report)
+    # Compute K-Means clustering if available
+    clustering_result = None
+    if perform_clustering is not None:
+        col_types = detect_column_types(cleaned_df) if detect_column_types is not None else {
+            c: "numeric" if pd.api.types.is_numeric_dtype(cleaned_df[c]) else "categorical"
+            for c in cleaned_df.columns
+        }
+        clustering_result = perform_clustering(cleaned_df, col_types)
+
+    # Tab-based layout
+    tab_dash, tab_ml, tab_quality, tab_preview = st.tabs([
+        "📊 Dashboard",
+        "🤖 ML & Insights",
+        "🧹 Data Quality",
+        "👀 Data Preview",
+    ])
+
+    with tab_dash:
+        summary_paragraph = generate_executive_summary(cleaned_df, analysis_results, clustering_result)
+        if summary_paragraph:
+            st.info(f"💡 **Dataset Overview & Key Findings:**\n\n{summary_paragraph}")
+
+        show_visualizations(cleaned_df, charts, analysis_results)
         st.divider()
         show_insights(insights)
-        st.divider()
-        show_visualizations(cleaned_df, charts)
-        st.divider()
+
+    with tab_ml:
+        st.markdown('<div class="section-header">🔥 Correlations & Outliers</div>', unsafe_allow_html=True)
         show_correlation(cleaned_df, corr_matrix)
-    elif active_section == "Dataset Overview":
-        show_dataset_overview(cleaned_df, metadata)
-        st.divider()
-        show_data_preview(cleaned_df)
-    elif active_section == "Data Cleaning":
+        if analysis_results and isinstance(analysis_results, dict):
+            outliers = analysis_results.get("outliers", {})
+            correlations = analysis_results.get("correlations", [])
+            numeric_summary = analysis_results.get("numeric_summary", {})
+            categorical_summary = analysis_results.get("categorical_summary", {})
+
+            if correlations:
+                st.markdown("##### 🔗 Top Correlations")
+                corr_df = pd.DataFrame(correlations)
+                st.dataframe(corr_df, **_width_kwarg())
+
+            if outliers:
+                st.markdown("##### ⚠️ Outlier Counts per Column")
+                outlier_df = pd.DataFrame(
+                    [{"Column": k, "Outlier Count": v} for k, v in outliers.items()]
+                )
+                st.dataframe(outlier_df, **_width_kwarg())
+
+            if numeric_summary:
+                st.markdown("##### 📈 Numeric Column Summary")
+                st.dataframe(pd.DataFrame(numeric_summary).T, **_width_kwarg())
+
+            if categorical_summary:
+                st.markdown("##### 🏷️ Categorical Column Summary")
+                st.dataframe(pd.DataFrame(categorical_summary).T, **_width_kwarg())
+        else:
+            st.info("Full ML output available once analyzer module is connected.")
+
+        # ── K-Means Clustering Section ──────────────────────────────────────
+        st.markdown("---")
+        st.markdown('<div class="section-header">🧩 K-Means Clustering</div>', unsafe_allow_html=True)
+        if clustering_result is not None:
+            if clustering_result.get("available"):
+                st.write(f"Found {clustering_result['n_clusters']} groups in the data")
+                st.dataframe(clustering_result["summary"], **_width_kwarg())
+            else:
+                st.info(clustering_result.get("reason", "Clustering not available."))
+        else:
+            st.info("Clustering module not available.")
+
+    with tab_quality:
         show_cleaning_report(cleaning_report)
-    elif active_section == "Insights":
-        show_insights(insights)
-    elif active_section == "Visualizations":
-        show_visualizations(cleaned_df, charts)
-        st.divider()
-        show_correlation(cleaned_df, corr_matrix)
+
+    with tab_preview:
+        st.markdown('<div class="section-header">👀 Cleaned Data Preview</div>', unsafe_allow_html=True)
+
+        col_types = detect_column_types(cleaned_df) if detect_column_types is not None else {
+            c: "numeric" if pd.api.types.is_numeric_dtype(cleaned_df[c]) else "categorical"
+            for c in cleaned_df.columns
+        }
+
+        pills_html = ['<div class="type-pills-container">']
+        for col_name in cleaned_df.columns:
+            t = str(col_types.get(col_name, "text")).lower()
+            if "date" in t:
+                css_cls = "date"
+                icon = "📅"
+                label = "Date"
+            elif "num" in t or "float" in t or "int" in t:
+                css_cls = "numeric"
+                icon = "🔢"
+                label = "Numeric"
+            elif "cat" in t:
+                css_cls = "categorical"
+                icon = "🏷️"
+                label = "Categorical"
+            else:
+                css_cls = "text"
+                icon = "📝"
+                label = "Text"
+            pills_html.append(f'<span class="type-pill {css_cls}">{icon} <strong>{col_name}</strong>: {label}</span>')
+        pills_html.append('</div>')
+        st.markdown("".join(pills_html), unsafe_allow_html=True)
+
+        st.dataframe(cleaned_df, **_width_kwarg())
+        csv_bytes = cleaned_df.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label="⬇️ Download Cleaned CSV",
+            data=csv_bytes,
+            file_name="cleaned_data.csv",
+            mime="text/csv",
+        )
 
 
 # ==============================================================================
 # 5. SIDEBAR
 # ==============================================================================
-def render_sidebar() -> Tuple[str, bool]:
-    """🔟 SIDEBAR: Clean, minimal navigation and hackathon info."""
+def render_sidebar(df: Optional[pd.DataFrame] = None) -> Tuple[pd.DataFrame, bool]:
+    """🔟 SIDEBAR: Filters, quick demo, and hackathon info."""
+    filtered_df = df
     with st.sidebar:
         st.markdown("### 🔍 AutoInsight")
         st.caption("Upload. Analyze. Understand.")
         st.markdown("---")
 
-        nav_selection = st.radio(
-            "Navigation",
-            options=[
-                "Dashboard",
-                "Dataset Overview",
-                "Data Cleaning",
-                "Insights",
-                "Visualizations",
-            ],
-            index=0,
-            key="nav_selection",
-        )
-
-        st.markdown("---")
         st.markdown("#### ⚡ Quick Demo")
         demo_clicked = st.button("🎲 Load Sample Dataset", **_width_kwarg())
+
+        # ── Dataset filters (only when data is loaded) ──────────────────────
+        if df is not None and not df.empty:
+            st.markdown("---")
+            st.markdown("#### 🔎 Filters")
+
+            total_rows = len(df)
+            filtered_df = df.copy()
+
+            # Categorical multiselects
+            cat_cols = df.select_dtypes(include=["object", "category", "str"]).columns.tolist()
+            for col in cat_cols:
+                unique_vals = sorted(df[col].dropna().unique().tolist())
+                if unique_vals:
+                    selected = st.multiselect(
+                        f"{col}",
+                        options=unique_vals,
+                        default=unique_vals,
+                        key=f"filter_{col}",
+                    )
+                    if selected:
+                        filtered_df = filtered_df[filtered_df[col].isin(selected)]
+
+            # Date range picker for the first detected date column
+            date_cols = []
+            for col in df.columns:
+                if col not in cat_cols:
+                    import warnings as _w
+                    with _w.catch_warnings():
+                        _w.simplefilter("ignore")
+                        parsed = pd.to_datetime(df[col], errors="coerce")
+                    if parsed.notna().sum() / max(len(df), 1) > 0.8:
+                        date_cols.append(col)
+
+            if date_cols:
+                date_col = date_cols[0]
+                parsed_dates = pd.to_datetime(df[date_col], errors="coerce").dropna()
+                if not parsed_dates.empty:
+                    min_date = parsed_dates.min().date()
+                    max_date = parsed_dates.max().date()
+                    date_range = st.date_input(
+                        f"📅 {date_col} range",
+                        value=(min_date, max_date),
+                        min_value=min_date,
+                        max_value=max_date,
+                        key=f"date_filter_{date_col}",
+                    )
+                    if isinstance(date_range, (list, tuple)) and len(date_range) == 2:
+                        start_d, end_d = date_range
+                        col_as_dates = pd.to_datetime(filtered_df[date_col], errors="coerce").dt.date
+                        filtered_df = filtered_df[
+                            col_as_dates.between(start_d, end_d)
+                        ]
+
+            shown = len(filtered_df)
+            st.caption(f"Showing **{shown:,}** of **{total_rows:,}** rows")
 
         st.markdown("---")
         st.caption("🚀 **Hackathon Team Integration**")
@@ -762,7 +898,7 @@ def render_sidebar() -> Tuple[str, bool]:
         st.caption("• `modules/analyzer.py`: Member 3")
         st.caption("• `app.py`: Dashboard UI (Active)")
 
-    return nav_selection, demo_clicked
+    return filtered_df, demo_clicked
 
 
 # ==============================================================================
@@ -772,22 +908,22 @@ def main() -> None:
     # 1️⃣ Header
     show_header()
 
-    # 🔟 Sidebar Navigation
-    nav_selection, demo_clicked = render_sidebar()
-
     # Session state for demo dataset
     if "use_demo" not in st.session_state:
         st.session_state["use_demo"] = False
 
-    if demo_clicked:
-        st.session_state["use_demo"] = True
-
     # 2️⃣ File Upload Section
-    uploaded_file = st.file_uploader(
-        "Upload your dataset",
-        type=["csv", "xlsx"],
-        help="Select a CSV or XLSX file to begin automated processing",
-    )
+    col_uploader, col_demo_btn = st.columns([3, 1])
+    with col_uploader:
+        uploaded_file = st.file_uploader(
+            "Upload your dataset",
+            type=["csv", "xlsx"],
+            help="Select a CSV or XLSX file to begin automated processing",
+        )
+    with col_demo_btn:
+        st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
+        if st.button("🚀 Load Demo Dataset", help="Automatically loads sample sales data without manual file selection", **_width_kwarg()):
+            st.session_state["use_demo"] = True
 
     if uploaded_file is not None:
         st.session_state["use_demo"] = False
@@ -826,9 +962,29 @@ def main() -> None:
                 st.error(f"Could not read uploaded dataset: {e}")
                 return
 
-    elif st.session_state["use_demo"]:
-        df = _create_sample_dataset()
-        st.success("Loaded demo dataset for hackathon presentation.")
+        # ── Dataset status indicator ─────────────────────────────────────────
+        if df is not None:
+            show_dataset_strip(uploaded_file.name, len(df), len(df.columns))
+        else:
+            st.info("Upload a dataset to begin")
+
+    elif st.session_state.get("use_demo", False):
+        try:
+            demo_path = "sample_data/sales_sample.csv"
+            if load_data is not None:
+                loaded_result = load_data(demo_path)
+                if isinstance(loaded_result, tuple):
+                    df, metadata = loaded_result
+                else:
+                    df = loaded_result
+            else:
+                df = pd.read_csv(demo_path)
+            show_dataset_strip("sales_sample.csv (Demo)", len(df), len(df.columns))
+        except Exception as e:
+            df = _create_sample_dataset()
+            show_dataset_strip("synthetic_sample.csv (Demo)", len(df), len(df.columns))
+    else:
+        st.info("Upload a dataset to begin")
 
     # 3️⃣ Empty State
     if df is None:
@@ -864,13 +1020,68 @@ def main() -> None:
             st.warning(f"Notice: analyzer module error ({e}).")
             analysis_results = None
 
-    # Master dashboard rendering
+    # ── KPI Cards & Quality Score ──────────────────────────────────────────────
+    total_rows = len(cleaned_df)
+    total_cols = len(cleaned_df.columns)
+    total_cells = max(1, total_rows * total_cols)
+    total_missing = int(cleaned_df.isnull().sum().sum())
+    total_dupes = int(cleaned_df.duplicated().sum())
+
+    missing_pct = (total_missing / total_cells) * 100.0
+    duplicate_pct = (total_dupes / max(1, total_rows)) * 100.0
+
+    total_outliers = 0
+    if analysis_results and isinstance(analysis_results.get("outliers"), dict):
+        total_outliers = sum(v for v in analysis_results["outliers"].values() if isinstance(v, (int, float)))
+    outlier_pct = (total_outliers / max(1, total_rows)) * 100.0
+
+    quality_score = 100.0 - (missing_pct * 0.4) - (duplicate_pct * 0.4) - (outlier_pct * 0.2)
+    quality_score = max(0.0, min(100.0, quality_score))
+    score_int = int(round(quality_score))
+
+    if score_int >= 80:
+        quality_label = "✅ Good"
+    elif score_int >= 50:
+        quality_label = "⚠️ Fair"
+    else:
+        quality_label = "❌ Needs Review"
+
+    kpi1, kpi2, kpi3, kpi4, kpi5 = st.columns(5)
+    with kpi1:
+        st.metric("Total Rows", f"{total_rows:,}")
+    with kpi2:
+        st.metric("Total Columns", f"{total_cols:,}")
+    with kpi3:
+        st.metric(
+            "Missing Values", f"{total_missing:,}",
+            delta="⚠ Needs Cleaning" if total_missing > 0 else "✓ Clean",
+            delta_color="inverse" if total_missing > 0 else "normal",
+        )
+    with kpi4:
+        st.metric(
+            "Duplicate Rows", f"{total_dupes:,}",
+            delta="⚠ Needs Cleaning" if total_dupes > 0 else "✓ Unique",
+            delta_color="inverse" if total_dupes > 0 else "normal",
+        )
+    with kpi5:
+        st.metric(
+            "Quality Score", f"{score_int}/100",
+            delta=quality_label,
+            delta_color="normal" if score_int >= 80 else ("off" if score_int >= 50 else "inverse"),
+        )
+
+    # 🔟 Sidebar (filters rendered after data is available)
+    filtered_df, demo_clicked = render_sidebar(cleaned_df)
+    if demo_clicked:
+        st.session_state["use_demo"] = True
+        st.rerun()
+
+    # Master dashboard rendering (uses filtered df for charts/insights)
     display_dashboard(
-        cleaned_df=cleaned_df,
+        cleaned_df=filtered_df,
         metadata=metadata,
         cleaning_report=cleaning_report,
         analysis_results=analysis_results,
-        active_section=nav_selection,
     )
 
 
