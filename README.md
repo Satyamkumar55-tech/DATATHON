@@ -2,7 +2,7 @@
 
 ## 📌 About the Project
 
-**AutoInsight AI** is an intelligent data analysis and visualization application built during **DATATHON 2026**.
+**AutoInsight** is an intelligent data analysis and visualization application built during **DATATHON 2026**.
 
 The goal of the project is to make data analysis easier and more accessible. Users can upload a CSV dataset, clean and analyze the data, explore patterns, visualize insights, and get an overall understanding of their dataset through an interactive dashboard.
 
